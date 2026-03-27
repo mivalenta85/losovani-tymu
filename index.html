@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Losování sezení</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 32px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+  }
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 28px;
+  }
+  .label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #a0aec0;
+    margin-bottom: 12px;
+  }
+  .name-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .name-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .name-item:hover {
+    border-color: #c3dafe;
+    background: #ebf4ff;
+  }
+  .name-item.selected {
+    border-color: #f6ad55;
+    background: #fffaf0;
+  }
+  .name-item input[type="radio"] {
+    accent-color: #ed8936;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .name-item .person-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #2d3748;
+    flex: 1;
+  }
+  .badge-vedouci {
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #ed8936;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: #a0aec0;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: #4f46e5;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-bottom: 28px;
+  }
+  .btn:hover { background: #4338ca; }
+  .btn:active { transform: scale(0.98); }
+  .result { display: none; }
+  .result.show { display: block; }
+  .vedouci-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fffaf0;
+    border: 1px solid #f6ad55;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    color: #744210;
+    font-weight: 500;
+  }
+  .seat-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .seat-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    animation: slideIn 0.3s ease both;
+  }
+  .seat-item:nth-child(1) { animation-delay: 0.03s; }
+  .seat-item:nth-child(2) { animation-delay: 0.07s; }
+  .seat-item:nth-child(3) { animation-delay: 0.11s; }
+  .seat-item:nth-child(4) { animation-delay: 0.15s; }
+  .seat-item:nth-child(5) { animation-delay: 0.19s; }
+  .seat-item:nth-child(6) { animation-delay: 0.23s; }
+  .seat-item:nth-child(7) { animation-delay: 0.27s; }
+  .seat-item:nth-child(8) { animation-delay: 0.31s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .seat-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .seat-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2d3748;
+  }
+  .divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 24px 0;
+  }
+  .reset-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #718096;
+    font-size: 0.88rem;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 16px;
+  }
+  .reset-btn:hover { background: #f7fafc; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🎲 Losování sezení</h1>
+  <p class="subtitle">Náhodné rozsazení týmu na poradu</p>
+
+  <p class="label">Kdo dnes vede poradu?</p>
+  <p class="hint">Vyber své jméno – budeš vyřazen/a z losování míst.</p>
+
+  <ul class="name-list" id="nameList"></ul>
+
+  <button class="btn" onclick="losovat()">🎯 Rozlosovat</button>
+
+  <div class="result" id="result">
+    <div class="vedouci-banner" id="vedouciBanner"></div>
+    <p class="label">Pořadí od dveří ke kuchyňce:</p>
+    <ul class="seat-list" id="seatList"></ul>
+    <button class="reset-btn" onclick="resetovat()">↺ Losovat znovu</button>
+  </div>
+</div>
+
+<script>
+  const clenove = [
+    "Michal", "Eva", "Roman", "Jarka", "Bára",
+    "Danča", "Honza", "Jana", "Blanche"
+  ];
+
+  let vybranýVedouci = null;
+
+  function buildNameList() {
+    const list = document.getElementById("nameList");
+    list.innerHTML = "";
+    clenove.forEach((jmeno, i) => {
+      const li = document.createElement("li");
+      li.className = "name-item";
+      li.setAttribute("onclick", `vyberVedouciho(${i}, this)`);
+      li.innerHTML = `
+        <input type="radio" name="vedouci" value="${i}" id="r${i}">
+        <label class="person-name" for="r${i}">${jmeno}</label>
+        <span class="badge-vedouci" style="display:none">Vedoucí</span>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  function vyberVedouciho(index, el) {
+    vybranýVedouci = index;
+    document.querySelectorAll(".name-item").forEach(item => {
+      item.classList.remove("selected");
+      item.querySelector(".badge-vedouci").style.display = "none";
+    });
+    el.classList.add("selected");
+    el.querySelector("input").checked = true;
+    el.querySelector(".badge-vedouci").style.display = "inline";
+  }
+
+  function zamichat(pole) {
+    const arr = [...pole];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function losovat() {
+    const ucastnici = vybranýVedouci !== null
+      ? clenove.filter((_, i) => i !== vybranýVedouci)
+      : [...clenove];
+
+    const zamichani = zamichat(ucastnici);
+    const list = document.getElementById("seatList");
+    const result = document.getElementById("result");
+    const banner = document.getElementById("vedouciBanner");
+
+    if (vybranýVedouci !== null) {
+      const jmeno = clenove[vybranýVedouci];
+      const koncovka = ["a", "e", "i", "o", "u"].includes(jmeno.slice(-1).toLowerCase()) ? "a" : "";
+      banner.style.display = "flex";
+      banner.innerHTML = `🎤 <strong>${jmeno}</strong>&nbsp;vylosoval${koncovka} dnešní rozsazení`;
+    } else {
+      banner.style.display = "none";
+    }
+
+    list.innerHTML = "";
+    zamichani.forEach((jmeno, i) => {
+      const li = document.createElement("li");
+      li.className = "seat-item";
+      li.innerHTML = `
+        <span class="seat-num">${i + 1}</span>
+        <span class="seat-name">${jmeno}</span>
+      `;
+      list.appendChild(li);
+    });
+
+    result.className = "result show";
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function resetovat() {
+    document.getElementById("result").className = "result";
+    document.querySelectorAll(".name-item").forEach(item => {
+      item.classList.remove("selected");
+      item.querySelector(".badge-vedouci").style.display = "none";
+      item.querySelector("input").checked = false;
+    });
+    vybranýVedouci = null;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  buildNameList();
+</script>
+</body>
+</html>
